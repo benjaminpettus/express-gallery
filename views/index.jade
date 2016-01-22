@@ -1,12 +1,9 @@
-<!DOCTYPE html>
-html(lang="en")
-head
-  meta(charset="UTF-8")
-  title Document
-body
+extends ./layout.jade
+
+block content
   ul
     each photo in photos
-      li #{photo.description}
+      li= photo.description
         img(src='#{photo.link}')
         p #{"taken by: " + photo.author}
 

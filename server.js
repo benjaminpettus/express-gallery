@@ -2,6 +2,7 @@ var express = require('express');
 var path =require('path');
 
 var db = require('./models');
+var Pix = db.Pix;
 var PORT = 5555;
 
 
@@ -10,24 +11,36 @@ var app = express();
 app.set('view engine', 'jade');
 app.set('views', 'views');
 
+var methodOverride = require('method-override');
+//whatever is passed in here has to be used as the query paramater in jade
+app.use(methodOverride('_method'));
+
 app.get('/', function (req, res) {
-  var data = {
-    photos:[
-    {author: 'Ben', link: 'http://lorempixel.com/300/300/transport', description: 'this is a picture of some type of transport'},
-    {author: 'Kevin', link: 'http://lorempixel.com/300/300/sports', description: 'this is a picture of some type of sports'},
-    {author: 'Chaz', link: 'http://lorempixel.com/300/300/nature', description: 'this is a picture of some type of nature'}
-    ]};
-  res.render('index', data);
+  Pix.findAll()
+  .then(function (photos) {
+
+      res.render('index', {photos: photos});
+    });    
 });
 
-// app.get('/gallery/:id', function (req, res) {
+app.get('/gallery/:id', function (req, res) {
+    console.log(req.params);
+    Pix.findById(req.params.id)
+    .then(function (result){
+      var locals = {
+        id:          result.id,
+        author:      result.author,
+        link:        result.link,
+        description: result.description 
+      };
+      res.render('gallery', locals);
+    });
 
+});
 
-// });
+app.get('/gallery/new', function (req, res) {
 
-// app.get('/gallery/new', function (req, res) {
-
-// });
+});
 
 // sync then listen on port
 db.sequelize
