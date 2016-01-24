@@ -23,6 +23,11 @@ app.get('/', function (req, res) {
     });    
 });
 
+app.get('/gallery/new', function (req, res) {
+  res.render('new_pic', {});
+
+});
+
 app.get('/gallery/:id', function (req, res) {
     console.log(req.params);
     Pix.findById(req.params.id)
@@ -38,9 +43,6 @@ app.get('/gallery/:id', function (req, res) {
 
 });
 
-app.get('/gallery/new', function (req, res) {
-
-});
 
 // sync then listen on port
 db.sequelize
