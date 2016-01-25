@@ -1,0 +1,13 @@
+extends ./layout.jade
+
+block content
+  ul
+    li #{description}
+      img(src='#{link}')
+      p #{author}
+
+    form(method="POST" action="/edit_method=PUT")
+      input(type="submit" value="edit")
+
+    form(action="/edit_method=DELETE" method="POST")
+      input(type="submit" value="delete")

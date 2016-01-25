@@ -3,7 +3,7 @@ extends ./layout.jade
 block content
   body
     h1 New Photo
-    form(name="get photo")
+    form(action="/gallery" method="POST")
       input(type="text", name="author" value="Author")
       input(type="text", name="link" value="Link")
       input(type="text", name="description" value="Description")
