@@ -43,16 +43,15 @@ app.get('/gallery/:id', function (req, res) {
 
 });
 app.get('/gallery/:id/edit', function (req, res) {
-    console.log(req.params);
    Pix.findById(req.params.id)
-   .then(function (result){
-    var locals = {
-      id: result.id,
-      author: result.author,
-      link: result.link, 
-      description: result.description
-    };
-  res.render('edit', locals);
+   .then(function (result){    
+      var locals = {
+        id: result.id,
+        author: result.author,
+        link: result.link, 
+        description: result.description
+      };
+      res.render('edit', locals);
 });
 
 });

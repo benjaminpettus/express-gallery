@@ -5,9 +5,14 @@ block content
     li #{description}
       img(src='#{link}')
       p #{author}
+    
+    form(action="/gallery" method="POST")
+      input(type="text", name="author" value='#{author}')
+      input(type="text", name="link" value='#{link}')
+      input(type="text", name="description" value='#{description}')
 
-    form(method="PUT" action="/edit_method?=PUT")
+    form(method="GET" action="/edit_method=PUT")
       input(type="submit" value="EDIT")
 
-    form(action="/edit_method?=DELETE" method="DELETE")
+    form(method="GET" action="/edit_method=DELETE")
       input(type="submit" value="DELETE")
