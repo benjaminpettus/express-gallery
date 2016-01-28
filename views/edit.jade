@@ -11,8 +11,8 @@ block content
       input(type="text", name="link" value='#{link}')
       input(type="text", name="description" value='#{description}')
 
-    form(method="GET" action="/edit_method=PUT")
+    form(method="POST" action="edit_method?=PUT")
       input(type="submit" value="EDIT")
 
-    form(method="GET" action="/edit_method=DELETE")
+    form(method="POST" action="edit_method?=DELETE")
       input(type="submit" value="DELETE")

@@ -33,10 +33,10 @@ app.get('/gallery/:id', function (req, res) {
     Pix.findById(req.params.id)
     .then(function (result){
       var locals = {
-        id:          result.id,
-        author:      result.author,
-        link:        result.link,
-        description: result.description 
+        id:          req.body.id,
+        author:      req.body.author,
+        link:        req.body.link,
+        description: req.body.description 
       };
       res.render('gallery', locals);
     });
