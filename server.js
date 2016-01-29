@@ -11,6 +11,10 @@ var app = express();
 
 app.set('view engine', 'jade');
 app.set('views', 'views');
+
+//tells express where all public files are located
+app.use(express.static('public'));
+
 app.use(bodyParser.urlencoded({extended: false}));
 //whatever is passed in here has to be used as the query paramater in jade
 app.use(methodOverride('_method'));
@@ -33,10 +37,10 @@ app.get('/gallery/:id', function (req, res) {
     Pix.findById(req.params.id)
     .then(function (result){
       var locals = {
-        id:          req.body.id,
-        author:      req.body.author,
-        link:        req.body.link,
-        description: req.body.description 
+        id:          result.id,
+        author:      result.author,
+        link:        result.link,
+        description: result.description 
       };
       res.render('gallery', locals);
     });
@@ -46,15 +50,35 @@ app.get('/gallery/:id/edit', function (req, res) {
    Pix.findById(req.params.id)
    .then(function (result){    
       var locals = {
-        id: result.id,
-        author: result.author,
-        link: result.link, 
+        id:          result.id,
+        author:      result.author,
+        link:        result.link, 
         description: result.description
       };
       res.render('edit', locals);
-});
+    });
 
 });
+
+app.put('/gallery/:id', function (req, res) {
+  Pix.find({
+    id: req.body.id,
+    author: req.body.author,
+    link: req.body.link,
+    description: req.body.description
+  })
+  .then(function (result){
+   res.send('image deleted from gallery');
+    
+  });
+});
+
+// app.delete('/gallery/:id', function (req, res){
+//   Pix.findById(req.params.id)
+//   .then(function (result){
+
+//   });
+// });
 
 app.post('/gallery/:id', function (req, res) {
   Pix.create({
