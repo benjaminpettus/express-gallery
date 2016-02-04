@@ -19,6 +19,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 //whatever is passed in here has to be used as the query paramater in jade
 app.use(methodOverride('_method'));
 
+//get localhost:3000
 app.get('/', function (req, res) {
   Pix.findAll()
   .then(function (photos) {
@@ -27,11 +28,13 @@ app.get('/', function (req, res) {
     });    
 });
 
+//get localhost:3000/gallery/new
 app.get('/gallery/new', function (req, res) {
   res.render('pic_form', {});
 
 });
 
+////get localhost:300/gallery/:id
 app.get('/gallery/:id', function (req, res) {
     console.log(req.params);
     Pix.findById(req.params.id)
@@ -55,40 +58,51 @@ app.get('/gallery/:id/edit', function (req, res) {
         link:        result.link, 
         description: result.description
       };
-      res.render('edit', locals);
+      res.render('pic_form', locals);
     });
 
 });
 
 app.put('/gallery/:id', function (req, res) {
-  Pix.find({
+  Pix.update(
+  {
     id: req.body.id,
     author: req.body.author,
     link: req.body.link,
-    description: req.body.description
-  })
+    description: req.body.description,
+    updatedAt: new Date()
+  },
+  {
+    where: {id: req.params.id}, 
+    returning: true
+  }
+)
   .then(function (result){
-   res.send('image deleted from gallery');
+   res.redirect('/gallery/' + req.params.id);
     
   });
 });
 
-// app.delete('/gallery/:id', function (req, res){
-//   Pix.findById(req.params.id)
-//   .then(function (result){
+app.delete('/gallery/:id', function (req, res) {
+  Pix.destroy(
+    {
+      where:
+        {id: parseInt(req.params.id)}
+    } 
+  )
+  .then(function () {
+    res.redirect('/');
+  });
+});
 
-//   });
-// });
 
+//renders page according to image id
 app.post('/gallery/:id', function (req, res) {
-  Pix.create({
-    author: req.body.author,
-    link: req.body.link,
-    description: req.body.description
-    })
+  Pix.create(req.body)
     .then(function (result){
-    res.redirect('/gallery/' + result.id);
+      res.redirect('/gallery/' + result.id);
     });
+
 });
 
 // sync then listen on port
