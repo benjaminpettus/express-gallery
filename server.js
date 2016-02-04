@@ -1,10 +1,13 @@
 var express = require('express');
 var path =require('path');
 var bodyParser = require('body-parser');
+var CONFIG = require('./config');
 var db = require('./models');
 var methodOverride = require('method-override');
 var Pix = db.Pix;
 var PORT = 5555;
+var passport = require('passport');
+var BasicStrategy = require('passport-http').BasicStrategy;//using basic authentication strategy 
 
 
 var app = express();
@@ -19,6 +22,26 @@ app.use(bodyParser.urlencoded({extended: false}));
 //whatever is passed in here has to be used as the query paramater in jade
 app.use(methodOverride('_method'));
 
+passport.use(new BasicStrategy(
+  function(username, password, done){
+    //authentication strategy
+  }));
+
+function authenticate(username, password) {
+  var CREDENTIALS = CONFIG.CREDENTIALS;
+  var USERNAME = CREDENTIALS.USERNAME;
+  var PASSWORD = CREDENTIALS.PASSWORD;
+
+  return username === USERNAME &&
+         password === PASSWORD;
+}
+
+function isAuthenticated (req, res, next) {
+  if(!req.isAuthenticated()){
+    return res.redirect('/login');
+  }
+  return next();
+}
 //get localhost:3000
 app.get('/', function (req, res) {
   Pix.findAll()
@@ -28,8 +51,21 @@ app.get('/', function (req, res) {
     });    
 });
 
+app.get('/login', function (req, res) {
+  res.render('login');
+});
+
+app.get('/login', 
+  passport.authenticate('local', {
+    successRedirect: '/gallery/new',
+    failureRedirect: '/login'
+  })
+);
+
 //get localhost:3000/gallery/new
-app.get('/gallery/new', function (req, res) {
+app.get('/gallery/new', 
+  isAuthenticated,
+  function (req, res) {
   res.render('pic_form', {});
 
 });
@@ -49,7 +85,9 @@ app.get('/gallery/:id', function (req, res) {
     });
 
 });
-app.get('/gallery/:id/edit', function (req, res) {
+app.get('/gallery/:id/edit', 
+   isAuthenticated,
+   function (req, res) {
    Pix.findById(req.params.id)
    .then(function (result){    
       var locals = {
