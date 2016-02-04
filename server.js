@@ -25,6 +25,12 @@ app.use(methodOverride('_method'));
 passport.use(new BasicStrategy(
   function(username, password, done){
     //authentication strategy
+    var user = authenticate;
+    var isAuthenticated = authenticate(username, password);
+    if(!(username == user.username && password === user.password)) {
+      return done(null, false);
+     }
+     return done (null, user);
   }));
 
 function authenticate(username, password) {
@@ -56,18 +62,22 @@ app.get('/login', function (req, res) {
 });
 
 app.get('/login', 
-  passport.authenticate('local', {
+  passport.authenticate('basic', {
     successRedirect: '/gallery/new',
     failureRedirect: '/login'
   })
 );
 
+app.get('/logout', function (req, res) {
+  req.logout();
+  res.redirect('/');
+});
+
 //get localhost:3000/gallery/new
 app.get('/gallery/new', 
-  isAuthenticated,
+  passport.authenticate('basic', {session: false}),
   function (req, res) {
   res.render('pic_form', {});
-
 });
 
 ////get localhost:300/gallery/:id
