@@ -1,8 +1,7 @@
 { 
 
   "CREDENTIALS": {
-    "USERNAME": "admin",
-    "PASSWORD": "password"
+
   },
   "SESSION": {
     "secret": "yamatodamashii"

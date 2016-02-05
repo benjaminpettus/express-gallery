@@ -3,6 +3,7 @@ var path =require('path');
 var bodyParser = require('body-parser');
 var CONFIG = require('./config');
 var db = require('./models');
+var User = db.User;
 var methodOverride = require('method-override');
 var Pix = db.Pix;
 var PORT = 5555;
@@ -40,19 +41,24 @@ app.use(methodOverride('_method'));
 
 passport.use(new LocalStrategy(
   function (username, password, done) {
-    console.log('LocalStrategy'); 
-    console.log(authenticate);
-    var user = {name: CONFIG.CREDENTIALS.username};
-    var isAuthenticated = authenticate(username, password);
-    if (!(username === CONFIG.CREDENTIALS.USERNAME && password === CONFIG.CREDENTIALS.PASSWORD)) {
-    console.log(username, password, "fail"); //if not authenticated
+    User.find({
+      where: {
+        username: username,
+        password: password
+      }
+    })
+    .then(function (user){
+      if(!user) {
       return done(null, false);// no error, wrong credentials-- failure redirect
-    }
+        
+      }
     return done(null, user);
+    });
+    
   }));
 
 passport.serializeUser(function (user, done) {
-  done(null, user);
+  return done(null, user);
 });
 
 passport.deserializeUser(function (user, done) {
@@ -62,8 +68,8 @@ passport.deserializeUser(function (user, done) {
 
 function authenticate(username, password) {
   var CREDENTIALS = CONFIG.CREDENTIALS;
-  var USERNAME = CREDENTIALS.USERNAME;
-  var PASSWORD = CREDENTIALS.PASSWORD;
+  var USERNAME = User.USERNAME;
+  var PASSWORD = User.PASSWORD;
 
   return username === USERNAME &&
          password === PASSWORD;
@@ -101,6 +107,7 @@ app.get('/logout', function (req, res) {
   res.redirect('/');
 });
 
+
 //get localhost:5555/gallery/new
 app.get('/gallery/new', 
   isAuthenticated,
@@ -108,11 +115,28 @@ app.get('/gallery/new',
   res.render('pic_form',{});
 });
 
+app.get('/gallery/:id/edit', 
+  isAuthenticated,
+  function (req, res) {
+  console.log('hello');
+  Pix.findById(req.params.id)
+    .then(function (result){    
+      var locals = {
+        id:          result.id,
+        author:      result.author,
+        link:        result.link, 
+        description: result.description
+      };
+      res.render('pic_form', locals);
+    }).catch(function(err) {
+      console.error("edit gallery", err);
+    });
 
+});
 
 ////get localhost:300/gallery/:id
 app.get('/gallery/:id', function (req, res) {
-    console.log(req.params);
+    debugger;
     Pix.findById(req.params.id)
     .then(function (result){
       var locals = {
@@ -122,20 +146,8 @@ app.get('/gallery/:id', function (req, res) {
         description: result.description 
       };
       res.render('gallery', locals);
-    });
-
-});
-app.get('/gallery/:id/edit', 
-   function (req, res) {
-   Pix.findById(req.params.id)
-   .then(function (result){    
-      var locals = {
-        id:          result.id,
-        author:      result.author,
-        link:        result.link, 
-        description: result.description
-      };
-      res.render('pic_form', locals);
+    }).catch(function(err) {
+      console.error("get gallery", err);
     });
 
 });
