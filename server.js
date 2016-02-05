@@ -7,8 +7,9 @@ var methodOverride = require('method-override');
 var Pix = db.Pix;
 var PORT = 5555;
 var passport = require('passport');
-var BasicStrategy = require('passport-http').BasicStrategy;//using basic authentication strategy 
-
+var session = require('express-session');
+// var BasicStrategy = require('passport-http').BasicStrategy;//using basic authentication strategy 
+var LocalStrategy = require('passport-local').Strategy;
 
 var app = express();
 
@@ -19,19 +20,45 @@ app.set('views', 'views');
 app.use(express.static('public'));
 
 app.use(bodyParser.urlencoded({extended: false}));
+
+app.use(session(CONFIG.SESSION));
+app.use(passport.initialize());
+app.use(passport.session());
 //whatever is passed in here has to be used as the query paramater in jade
 app.use(methodOverride('_method'));
 
-passport.use(new BasicStrategy(
-  function(username, password, done){
-    //authentication strategy
-    var user = authenticate;
+// passport.use(new BasicStrategy(
+//   function(username, password, done){
+//     //authentication strategy
+//     var user = authenticate;
+//     var isAuthenticated = authenticate(username, password);
+//     if(!(username == CONFIG.CREDENTIALS.USERNAME && password === CONFIG.CREDENTIALS.PASSWORD)) {
+//       return done(null, false);
+//      }
+//      return done (null, user);
+//   }));
+
+passport.use(new LocalStrategy(
+  function (username, password, done) {
+    console.log('LocalStrategy'); 
+    console.log(authenticate);
+    var user = {name: CONFIG.CREDENTIALS.username};
     var isAuthenticated = authenticate(username, password);
-    if(!(username == user.username && password === user.password)) {
-      return done(null, false);
-     }
-     return done (null, user);
+    if (!(username === CONFIG.CREDENTIALS.USERNAME && password === CONFIG.CREDENTIALS.PASSWORD)) {
+    console.log(username, password, "fail"); //if not authenticated
+      return done(null, false);// no error, wrong credentials-- failure redirect
+    }
+    return done(null, user);
   }));
+
+passport.serializeUser(function (user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function (user, done) {
+  return done(null, user); 
+});
+
 
 function authenticate(username, password) {
   var CREDENTIALS = CONFIG.CREDENTIALS;
@@ -43,16 +70,17 @@ function authenticate(username, password) {
 }
 
 function isAuthenticated (req, res, next) {
+  console.log('isAuthenticated',!req.isAuthenticated() );
   if(!req.isAuthenticated()){
     return res.redirect('/login');
   }
   return next();
 }
+
 //get localhost:3000
 app.get('/', function (req, res) {
   Pix.findAll()
   .then(function (photos) {
-
       res.render('index', {photos: photos});
     });    
 });
@@ -61,8 +89,8 @@ app.get('/login', function (req, res) {
   res.render('login');
 });
 
-app.get('/login', 
-  passport.authenticate('basic', {
+app.post('/login',
+  passport.authenticate('local', {
     successRedirect: '/gallery/new',
     failureRedirect: '/login'
   })
@@ -73,12 +101,14 @@ app.get('/logout', function (req, res) {
   res.redirect('/');
 });
 
-//get localhost:3000/gallery/new
+//get localhost:5555/gallery/new
 app.get('/gallery/new', 
-  passport.authenticate('basic', {session: false}),
+  isAuthenticated,
   function (req, res) {
-  res.render('pic_form', {});
+  res.render('pic_form',{});
 });
+
+
 
 ////get localhost:300/gallery/:id
 app.get('/gallery/:id', function (req, res) {
@@ -96,7 +126,6 @@ app.get('/gallery/:id', function (req, res) {
 
 });
 app.get('/gallery/:id/edit', 
-   isAuthenticated,
    function (req, res) {
    Pix.findById(req.params.id)
    .then(function (result){    

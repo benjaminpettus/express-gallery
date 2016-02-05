@@ -4,7 +4,7 @@ block content
   body
     h1 New Photo
     img(src='#{link}')
-    form(action="/gallery" method="POST")
+    form(method="POST" action="/gallery/new")
       input(type="text", name="author" value="Author")
       input(type="text", name="link" value="Link")
       input(type="text", name="description" value="Description")
