@@ -4,8 +4,12 @@ block content
   body
     h1 New Photo
     img(src='#{link}')
-    form(method="POST" action="/gallery/new")
+    form(method="POST" action="/gallery/#{id}")
       input(type="text", name="author" value="#{author}")
       input(type="text", name="link" value="#{link}")
       input(type="text", name="description" value="#{description}")
-      input(type="submit", value="Submit")
+      Button(type="submit") Submit
+
+    form(method="POST" action="/gallery/#{id}")
+      input(type="hidden" name="_method" value="DELETE")
+      Button(type="submit") Delete

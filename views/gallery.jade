@@ -5,3 +5,6 @@ block content
     li #{description}
       img(src='#{link}')
       p #{author}
+
+  form(method="GET" action="/gallery/#{id}/edit")
+      Button(type="submit") Edit/Delete

@@ -9,6 +9,7 @@ var Pix = db.Pix;
 var PORT = 5555;
 var passport = require('passport');
 var session = require('express-session');
+var isAuthenticated = require('./middleware/isAuthenticated');
 // var BasicStrategy = require('passport-http').BasicStrategy;//using basic authentication strategy 
 var LocalStrategy = require('passport-local').Strategy;
 
@@ -75,13 +76,13 @@ function authenticate(username, password) {
          password === PASSWORD;
 }
 
-function isAuthenticated (req, res, next) {
-  console.log('isAuthenticated',!req.isAuthenticated() );
-  if(!req.isAuthenticated()){
-    return res.redirect('/login');
-  }
-  return next();
-}
+// function isAuthenticated (req, res, next) {
+//   console.log('isAuthenticated',!req.isAuthenticated() );
+//   if(!req.isAuthenticated()){
+//     return res.redirect('/login');
+//   }
+//   return next();
+// }
 
 //get localhost:3000
 app.get('/', function (req, res) {
@@ -91,10 +92,12 @@ app.get('/', function (req, res) {
     });    
 });
 
+//renders login page
 app.get('/login', function (req, res) {
   res.render('login');
 });
 
+//redirect for the login page
 app.post('/login',
   passport.authenticate('local', {
     successRedirect: '/gallery/new',
@@ -108,7 +111,7 @@ app.get('/logout', function (req, res) {
 });
 
 
-//get localhost:5555/gallery/new
+//get localhost:5555/gallery/new 
 app.get('/gallery/new', 
   isAuthenticated,
   function (req, res) {
@@ -136,7 +139,6 @@ app.get('/gallery/:id/edit',
 
 ////get localhost:300/gallery/:id
 app.get('/gallery/:id', function (req, res) {
-    debugger;
     Pix.findById(req.params.id)
     .then(function (result){
       var locals = {
@@ -175,10 +177,18 @@ app.put('/gallery/:id', function (req, res) {
 app.delete('/gallery/:id', function (req, res) {
   Pix.destroy(
     {
-      where:
-        {id: parseInt(req.params.id)}
+      where: {id: parseInt(req.params.id)},
+      force: true
     } 
   )
+  // Pix.findOne({
+  //   where: {
+  //     "id": id
+  //   }
+  // })
+  // .then(function (image){
+  //   return image.destroy({ force: true });
+  // })
   .then(function () {
     res.redirect('/');
   });
