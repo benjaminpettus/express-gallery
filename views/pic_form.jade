@@ -10,6 +10,5 @@ block content
       input(type="text", name="description" value="#{description}")
       Button(type="submit") Submit
 
-    form(method="POST" action="/gallery/#{id}")
-      input(type="hidden" name="_method" value="DELETE")
+    form(method="POST" action="/gallery/#{id}?_method=DELETE")
       Button(type="submit") Delete

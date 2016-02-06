@@ -1,5 +1,6 @@
 var express = require('express');
 var path =require('path');
+var morgan = require('morgan');
 var bodyParser = require('body-parser');
 var CONFIG = require('./config');
 var db = require('./models');
@@ -21,6 +22,7 @@ app.set('views', 'views');
 //tells express where all public files are located
 app.use(express.static('public'));
 
+app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: false}));
 
 app.use(session(CONFIG.SESSION));
@@ -121,7 +123,6 @@ app.get('/gallery/new',
 app.get('/gallery/:id/edit', 
   isAuthenticated,
   function (req, res) {
-  console.log('hello');
   Pix.findById(req.params.id)
     .then(function (result){    
       var locals = {
@@ -131,8 +132,6 @@ app.get('/gallery/:id/edit',
         description: result.description
       };
       res.render('pic_form', locals);
-    }).catch(function(err) {
-      console.error("edit gallery", err);
     });
 
 });
@@ -148,8 +147,7 @@ app.get('/gallery/:id', function (req, res) {
         description: result.description 
       };
       res.render('gallery', locals);
-    }).catch(function(err) {
-      console.error("get gallery", err);
+  
     });
 
 });
@@ -177,8 +175,7 @@ app.put('/gallery/:id', function (req, res) {
 app.delete('/gallery/:id', function (req, res) {
   Pix.destroy(
     {
-      where: {id: parseInt(req.params.id)},
-      force: true
+      where: {id: parseInt(req.params.id)}
     } 
   )
   // Pix.findOne({
